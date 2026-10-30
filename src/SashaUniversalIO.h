@@ -53,6 +53,9 @@ private:uint8_t _trigger,_echo;unsigned long _timeout;
 #if defined(SUI_ENABLE_TFT)
 #include "SUI_AdafruitTFT.h"
 #endif
+#if defined(SUI_ENABLE_ST7735S)
+#include "SUI_ST7735S.h"
+#endif
 #if defined(SUI_ENABLE_OLED)
 #include "SUI_AdafruitOLED.h"
 #endif
