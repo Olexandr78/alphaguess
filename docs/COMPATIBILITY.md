@@ -1,41 +1,37 @@
-# Compatibility and hardware notes
+# Compatibility and wiring notes
 
-## Character LCD
+## HW-504 joystick
+Common KY-023 style module: VRx and VRy are analog outputs; SW is a momentary push switch. Use SUI::Joystick(xPin, yPin, switchPin).
 
-`SUI_I2CLCD.h` currently targets HD44780-compatible character displays using the common PCF8574 backpack mapping:
+## HW-040 rotary encoder
+Common KY-040 style module: CLK, DT, SW. Use SUI::RotaryEncoder(clk, dt, sw) and call update() frequently from loop().
 
-- P0 RS
-- P1 RW
-- P2 Enable
-- P3 Backlight
-- P4..P7 D4..D7
+## Stepper motors
+Stepper4Wire drives four logic inputs in a basic sequence. Connect through a proper driver such as ULN2003 or another compatible driver. It is blocking and has no acceleration, current control, stall detection or microstepping. A4988/DRV8825-style STEP/DIR drivers need a different adapter.
 
-Common I2C addresses are 0x27 and 0x3F, but scan your bus instead of assuming. Some backpack boards use a different pin mapping and need a configurable mapping driver (planned).
+## Seven-segment and DIP switches
+The direct seven-segment class handles one digit with segment order a,b,c,d,e,f,g,dp. Put a current-limiting resistor in series with every segment. Common-anode and common-cathode wiring must match the constructor flag. Multiplexed displays and TM1637/MAX7219 modules need controller-specific support. DIP switches use INPUT_PULLUP; ON means the switch connects the pin to GND.
 
-## TFT
+## Microphones and beepers
+AnalogMicrophone reads an amplified analog output (AO). SoundDetector reads a digital comparator output (DO). A bare electret capsule needs bias and a preamplifier; it is not directly supported as a bare capsule. Passive buzzers use tone(); active buzzers use digital on/off.
 
-`SUI_AdafruitTFT.h` is a small API adapter, not a controller driver. It expects a display object compatible with Adafruit_GFX. Install and initialize the controller library separately.
+## HC-05 / HC-06 Bluetooth
+BluetoothUART wraps a Stream; pass Serial1 or a SoftwareSerial instance. Pairing, baud rate and AT mode are not configured automatically. Check UART voltage levels; use a divider/level shifter on module RX when needed.
 
-| Controller family | Typical Arduino driver |
-|---|---|
-| ST7735 | Adafruit_ST7735 |
-| ST7789 | Adafruit_ST7789 |
-| ILI9341 | Adafruit_ILI9341 |
-| ILI9488 | A compatible ILI9488 driver exposing Adafruit_GFX |
+## HW-748 / SIM800L
+HW-748 is listed by some sellers as a SIM800L GSM/GPRS module. SUI::SIM800L is only a low-level AT-command UART helper, not a full SMS/call/data stack. SIM800L requires a stable supply with high peak current and appropriate antenna/SIM setup. Check the exact board variant and logic levels.
 
-ILI9486 and parallel/RGB panels vary by driver and board. They are not guaranteed by this adapter. SSD1306 is an OLED controller, not a TFT controller.
+## SD / microSD
+SUI_SD.h wraps Arduino SD. Use a proper 3.3 V level-shifted microSD board with 5 V MCUs. Chip-select and SPI pins depend on the board.
 
-## Servo
+## DFPlayer Mini
+SUI_DFPlayer.h wraps DFRobotDFPlayerMini. Use a suitable serial port, correctly formatted microSD card and speaker wiring recommended by the module documentation.
 
-Include `SUI_Servo.h` and install the Arduino Servo library. Servos need an adequate external 5 V supply in many projects. Connect grounds together; never power a larger servo from an I/O pin.
+## LCD / TFT / servo / camera
+- I2C character LCD: HD44780 + common PCF8574 backpack mapping only.
+- TFT: Adafruit_GFX-compatible controller libraries; the adapter is not itself a controller driver.
+- Servo: requires Arduino Servo library and a suitable external supply for larger servos.
+- OV7670 is not implemented yet; capture support is MCU- and board-specific.
 
-## OV7670 camera
-
-OV7670 is a camera sensor, not a display. It outputs pixel data and requires sensor configuration over SCCB (I2C-like), clocking and high-speed pixel capture. Many classic AVR Arduino boards lack enough RAM and capture bandwidth for useful full-frame capture. A universal implementation would be misleading; a proper driver must target a specific board/capture method (for example FIFO-equipped modules or MCUs with a camera/DMA interface). This module remains on the roadmap.
-
-## Voltage and wiring
-
-- Check the module's VCC and logic voltage before connecting it.
-- Many TFT modules use 3.3 V logic and are not 5 V tolerant.
-- Relay modules can switch dangerous mains voltage. Use a properly enclosed, rated module and get qualified help; do not handle exposed mains wiring.
-- Use external supplies for motors/servos and connect grounds where required.
+## Safety
+Never power motors, servos, SIM800L or high-current loads from GPIO pins. Relays may switch hazardous mains voltage: use enclosed, correctly rated equipment and qualified help.
