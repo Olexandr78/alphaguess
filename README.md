@@ -56,7 +56,8 @@ Define the switch before `#include <SashaUniversalIO.h>`. Install the dependency
 | Define | Class / adapter | Dependency |
 |---|---|---|
 | `SUI_ENABLE_SERVO` | `ServoMotor` | Arduino Servo |
-| `SUI_ENABLE_TFT` | `AdafruitTFT` | Adafruit_GFX + matching controller driver |
+| `SUI_ENABLE_TFT` | `AdafruitTFT` | Adafruit_GFX + matching controller driver (legacy adapter) |
+| `SUI_ENABLE_ST7735S` | `ST7735S` | Native SPI driver for ST7735S; no Adafruit dependency |
 | `SUI_ENABLE_OLED` | `AdafruitOLED` | Adafruit_GFX + Adafruit SSD1306 |
 | `SUI_ENABLE_SD` | `SDCard` | Arduino SD |
 | `SUI_ENABLE_DFPLAYER` | `DFPlayer` | DFRobotDFPlayerMini |
@@ -74,7 +75,7 @@ Example:
 #include <SashaUniversalIO.h>
 ```
 
-The main header stays buildable without optional third-party libraries when their switches are not defined. On ESP32, install ESP32Servo for SUI_ENABLE_SERVO; on classic AVR boards, install the standard Servo library. For TFTs, include the controller driver and pass its display object to `SUI::AdafruitTFT<Display>`.
+The main header stays buildable without optional third-party libraries when their switches are not defined. On ESP32, install ESP32Servo for SUI_ENABLE_SERVO; on classic AVR boards, install the standard Servo library. For a native ST7735S display, define `SUI_ENABLE_ST7735S` before the main include and use `SUI::ST7735S`; it draws pixels, lines, rectangles, circles and basic ASCII text directly over SPI without Adafruit. The older `SUI_ENABLE_TFT` adapter remains available for other Adafruit_GFX-compatible controllers.
 
 ## OV7670 notes
 
@@ -92,7 +93,7 @@ The camera adapter wraps the upstream Arduino_OV767X driver. The upstream librar
 
 ## Examples
 
-`BasicModules`, `I2C_LCD`, `Parallel_LCD`, `ServoMotor`, `TFT_AdafruitGFX`, `OLED_SSD1306`, `Joystick_Encoder`, `SD_Card`, `Stepper_SevenSegment_Audio`, `DisplayControllers`, `OV7670_Capture`, `DFPlayer_Mini`, `Environmental_Sensors`.
+`BasicModules`, `I2C_LCD`, `Parallel_LCD`, `ServoMotor`, `TFT_ST7735S_SUI`, `TFT_AdafruitGFX`, `OLED_SSD1306`, `Joystick_Encoder`, `SD_Card`, `Stepper_SevenSegment_Audio`, `DisplayControllers`, `OV7670_Capture`, `DFPlayer_Mini`, `Environmental_Sensors`.
 
 ## Build and test status
 
