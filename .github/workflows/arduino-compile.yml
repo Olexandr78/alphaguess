@@ -37,7 +37,10 @@ jobs:
             SD_Card \
             ServoMotor \
             TFT_AdafruitGFX \
-            DFPlayer_Mini
+            DFPlayer_Mini \\
+            Parallel_LCD \\
+            OLED_SSD1306 \\
+            Environmental_Sensors
           do
             echo "Compiling $sketch"
             arduino-cli compile --fqbn arduino:avr:uno --library "$GITHUB_WORKSPACE" "examples/$sketch"
