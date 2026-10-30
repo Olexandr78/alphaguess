@@ -120,13 +120,13 @@ private:
 class ShiftRegister595 {
 public:
   ShiftRegister595(uint8_t dataPin,uint8_t clockPin,uint8_t latchPin,bool msbFirst=true)
-    : _data(dataPin),_clock(clockPin),_latch(latchPin),_order(msbFirst?MSBFIRST:LSBFIRST),_state(0) {}
+    : _data(dataPin),_clock(clockPin),_latch(latchPin),_msbFirst(msbFirst),_state(0) {}
   void begin(){ pinMode(_data,OUTPUT); pinMode(_clock,OUTPUT); pinMode(_latch,OUTPUT); write(0); }
-  void write(uint8_t value){ _state=value; digitalWrite(_latch,LOW); shiftOut(_data,_clock,_order,_state); digitalWrite(_latch,HIGH); }
+  void write(uint8_t value){ _state=value; digitalWrite(_latch,LOW); shiftOut(_data,_clock,_msbFirst?MSBFIRST:LSBFIRST,_state); digitalWrite(_latch,HIGH); }
   void set(uint8_t bit,bool on){ if(bit>7)return; if(on)_state|=(uint8_t)(1U<<bit);else _state&=(uint8_t)~(1U<<bit); write(_state); }
   uint8_t value() const{return _state;}
 private:
-  uint8_t _data,_clock,_latch,_order,_state;
+  uint8_t _data,_clock,_latch,_state;bool _msbFirst;
 };
 
 } // namespace SUI
