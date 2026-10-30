@@ -39,7 +39,6 @@ jobs:
             SD_Card \
             ServoMotor \
             TFT_ST7735S_SUI \
-            TFT_ST7735S_SUI \
             TFT_AdafruitGFX \
             OLED_SSD1306 \
             DFPlayer_Mini \
@@ -93,6 +92,7 @@ jobs:
             DisplayControllers \
             SD_Card \
             ServoMotor \
+            TFT_ST7735S_SUI \
             TFT_AdafruitGFX \
             OLED_SSD1306 \
             Environmental_Sensors
