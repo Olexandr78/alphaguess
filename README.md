@@ -11,7 +11,7 @@ The repository is still named `alphaguess`; its AlphaGuess APK and release are u
 
 SUI::Joystick joystick(A0, A1, 2);       // HW-504
 SUI::RotaryEncoder encoder(3, 4, 5);    // HW-040
-SUI::Relay relay(7, SUI::ActiveLevel::LOW);
+SUI::Relay relay(7, SUI::ActiveLevel::LOW_LEVEL);
 SUI::Stepper4Wire motor(8, 9, 10, 11);
 SUI::TM1637Display display(12, 13);
 
