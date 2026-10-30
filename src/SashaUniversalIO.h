@@ -25,10 +25,7 @@ class Button {
 public:
   explicit Button(uint8_t pin, bool usePullup=true) : _pin(pin), _pullup(usePullup) {}
   void begin() { pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT); }
-  bool isPressed() const {
-    const int v=digitalRead(_pin);
-    return _pullup ? v==LOW : v==HIGH;
-  }
+  bool isPressed() const { const int v=digitalRead(_pin); return _pullup ? v==LOW : v==HIGH; }
 private: uint8_t _pin; bool _pullup;
 };
 
@@ -57,5 +54,25 @@ private: uint8_t _trigger,_echo; unsigned long _timeout;
 };
 } // namespace SUI
 
-// The extra module classes rely on the core API above.
 #include "SUI_Modules.h"
+#include "SUI_Controllers.h"
+#include "SUI_I2CLCD.h"
+
+// Optional third-party adapters. Define a switch before this include to
+// make the corresponding driver available from this one umbrella header.
+// Example: #define SUI_ENABLE_DFPLAYER before #include <SashaUniversalIO.h>
+#if defined(SUI_ENABLE_SERVO)
+  #include "SUI_Servo.h"
+#endif
+#if defined(SUI_ENABLE_TFT)
+  #include "SUI_AdafruitTFT.h"
+#endif
+#if defined(SUI_ENABLE_SD)
+  #include "SUI_SD.h"
+#endif
+#if defined(SUI_ENABLE_DFPLAYER)
+  #include "SUI_DFPlayer.h"
+#endif
+#if defined(SUI_ENABLE_OV7670)
+  #include "SUI_OV7670.h"
+#endif
