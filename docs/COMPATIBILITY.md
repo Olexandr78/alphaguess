@@ -1,37 +1,38 @@
-# Compatibility and wiring notes
+# Compatibility, setup and wiring
 
 ## HW-504 joystick
-Common KY-023 style module: VRx and VRy are analog outputs; SW is a momentary push switch. Use SUI::Joystick(xPin, yPin, switchPin).
+VRx and VRy connect to analog inputs; SW is a momentary switch. `SUI::Joystick(xPin,yPin,swPin)` uses INPUT_PULLUP for SW. Example: A0, A1, D2.
 
 ## HW-040 rotary encoder
-Common KY-040 style module: CLK, DT, SW. Use SUI::RotaryEncoder(clk, dt, sw) and call update() frequently from loop().
+CLK, DT and optional SW connect to digital inputs. `SUI::RotaryEncoder(clk,dt,sw)` uses quadrature transition decoding; call `update()` frequently in loop(). Mechanical bounce and wiring quality can still affect readings.
 
 ## Stepper motors
-Stepper4Wire drives four logic inputs in a basic sequence. Connect through a proper driver such as ULN2003 or another compatible driver. It is blocking and has no acceleration, current control, stall detection or microstepping. A4988/DRV8825-style STEP/DIR drivers need a different adapter.
+- `Stepper4Wire` is a basic blocking 8-phase output sequence for a suitable four-input driver board (e.g. ULN2003).
+- `StepDirStepper` emits STEP/DIR pulses for A4988, DRV8825 or compatible drivers. Configure driver current limit, microstep pins and pulse timing. No acceleration planning or stall detection is implemented.
 
-## Seven-segment and DIP switches
-The direct seven-segment class handles one digit with segment order a,b,c,d,e,f,g,dp. Put a current-limiting resistor in series with every segment. Common-anode and common-cathode wiring must match the constructor flag. Multiplexed displays and TM1637/MAX7219 modules need controller-specific support. DIP switches use INPUT_PULLUP; ON means the switch connects the pin to GND.
+Never connect a motor winding directly to MCU pins.
+
+## Displays
+- `SevenSegment` controls one bare digit directly; order is a,b,c,d,e,f,g,dp. Use a resistor per segment.
+- `TM1637Display` handles common 4-digit TM1637 boards.
+- `MAX7219Display` handles MAX7219/MAX7221 serial segment modules. It writes raw segment data/digits; it is not a graphical matrix font renderer.
+- `I2CLCD` targets HD44780 LCDs with a common PCF8574 backpack pin mapping (P0=RS, P1=RW, P2=EN, P3=backlight, P4..P7=D4..D7). Other backpack mappings need a custom driver.
+- TFT support uses an Adafruit_GFX-compatible controller library; the helper is not a controller driver.
 
 ## Microphones and beepers
-AnalogMicrophone reads an amplified analog output (AO). SoundDetector reads a digital comparator output (DO). A bare electret capsule needs bias and a preamplifier; it is not directly supported as a bare capsule. Passive buzzers use tone(); active buzzers use digital on/off.
+The analog microphone helper reads an already amplified analog output. A bare electret capsule requires bias and a preamplifier. A digital sound module's DO output can be read using `SoundDetector`. Active beepers are digital on/off; passive piezo buzzers use `tone()`.
 
-## HC-05 / HC-06 Bluetooth
-BluetoothUART wraps a Stream; pass Serial1 or a SoftwareSerial instance. Pairing, baud rate and AT mode are not configured automatically. Check UART voltage levels; use a divider/level shifter on module RX when needed.
+## Bluetooth and GSM
+`BluetoothUART` wraps any Arduino `Stream`; pass HardwareSerial or SoftwareSerial. It does not configure pairing or AT mode. HW-748 is sold as a SIM800L breakout/kit; `SIM800L` only sends raw AT commands and exposes the serial stream. It is not a full SMS/call/network implementation. Verify logic levels and power supply requirements.
 
-## HW-748 / SIM800L
-HW-748 is listed by some sellers as a SIM800L GSM/GPRS module. SUI::SIM800L is only a low-level AT-command UART helper, not a full SMS/call/data stack. SIM800L requires a stable supply with high peak current and appropriate antenna/SIM setup. Check the exact board variant and logic levels.
+## SD and DFPlayer
+`SDCard` wraps the Arduino SD API and uses the board's SPI pins plus chip select. `DFPlayer` wraps DFRobotDFPlayerMini. Insert and prepare a compatible microSD card before playback; track order and file naming follow the DFPlayer documentation.
 
-## SD / microSD
-SUI_SD.h wraps Arduino SD. Use a proper 3.3 V level-shifted microSD board with 5 V MCUs. Chip-select and SPI pins depend on the board.
+## OV7670
+`SUI_OV7670.h` wraps the upstream Arduino_OV767X library. Define `SUI_ENABLE_OV7670` before including the umbrella header. Upstream examples document supported boards such as Nano 33 BLE, with large frame buffers and limited frame rates. It is not a generic AVR Uno camera driver.
 
-## DFPlayer Mini
-SUI_DFPlayer.h wraps DFRobotDFPlayerMini. Use a suitable serial port, correctly formatted microSD card and speaker wiring recommended by the module documentation.
-
-## LCD / TFT / servo / camera
-- I2C character LCD: HD44780 + common PCF8574 backpack mapping only.
-- TFT: Adafruit_GFX-compatible controller libraries; the adapter is not itself a controller driver.
-- Servo: requires Arduino Servo library and a suitable external supply for larger servos.
-- OV7670 is not implemented yet; capture support is MCU- and board-specific.
-
-## Safety
-Never power motors, servos, SIM800L or high-current loads from GPIO pins. Relays may switch hazardous mains voltage: use enclosed, correctly rated equipment and qualified help.
+## Voltage and safety
+- Check each breakout revision and pinout.
+- Use level shifting for 3.3V-only inputs when connected to 5V boards.
+- Do not power motors, servos or SIM800L from GPIO pins.
+- Relays may switch hazardous mains voltage. Use enclosed, correctly rated equipment and qualified help.
