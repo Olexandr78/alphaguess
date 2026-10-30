@@ -7,8 +7,8 @@
 namespace SUI {
 class OV7670Camera {
 public:
-  bool begin(int resolution=QVGA,int format=RGB565,int fps=1,int cameraModel=OV7670) {
-    _ready = (Camera.begin(resolution,format,fps,cameraModel) == 1);
+  bool begin(int resolution=QVGA,int format=RGB565,int fps=1) {
+    _ready = (Camera.begin(resolution,format,fps) == 1);
     return _ready;
   }
   void end(){ if(_ready) Camera.end(); _ready=false; }
