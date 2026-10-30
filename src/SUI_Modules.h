@@ -4,6 +4,53 @@
 #include <limits.h>
 
 namespace SUI {
+
+class DigitalInput {
+public:
+  explicit DigitalInput(uint8_t pin,bool activeLow=false,bool pullup=false)
+    :_pin(pin),_activeLow(activeLow),_pullup(pullup){}
+  void begin(){pinMode(_pin,_pullup?INPUT_PULLUP:INPUT);}
+  bool read()const{int v=digitalRead(_pin);return _activeLow?v==LOW:v==HIGH;}
+  int raw()const{return digitalRead(_pin);}
+private:uint8_t _pin;bool _activeLow,_pullup;
+};
+
+class AnalogInput {
+public:
+  explicit AnalogInput(uint8_t pin):_pin(pin){}
+  void begin(){pinMode(_pin,INPUT);}
+  int read()const{return analogRead(_pin);}
+private:uint8_t _pin;
+};
+
+class PWMOutput {
+public:
+  explicit PWMOutput(uint8_t pin):_pin(pin){}
+  void begin(){pinMode(_pin,OUTPUT);write(0);}
+  void write(uint8_t value){analogWrite(_pin,value);}
+  void off(){write(0);}
+private:uint8_t _pin;
+};
+
+class DebouncedButton {
+public:
+  explicit DebouncedButton(uint8_t pin,unsigned long debounceMs=30)
+    :_pin(pin),_debounce(debounceMs),_lastRaw(HIGH),_stable(HIGH),_changedAt(0),_pressedEvent(false),_releasedEvent(false){}
+  void begin(){pinMode(_pin,INPUT_PULLUP);_lastRaw=_stable=digitalRead(_pin);_changedAt=millis();}
+  void update(){
+    _pressedEvent=false;_releasedEvent=false;
+    bool raw=digitalRead(_pin);
+    if(raw!=_lastRaw){_lastRaw=raw;_changedAt=millis();}
+    if((millis()-_changedAt)>=_debounce && raw!=_stable){
+      _stable=raw;_pressedEvent=(_stable==LOW);_releasedEvent=(_stable==HIGH);
+    }
+  }
+  bool isPressed()const{return _stable==LOW;}
+  bool wasPressed(){bool v=_pressedEvent;_pressedEvent=false;return v;}
+  bool wasReleased(){bool v=_releasedEvent;_releasedEvent=false;return v;}
+private:uint8_t _pin;unsigned long _debounce;bool _lastRaw,_stable;unsigned long _changedAt;bool _pressedEvent,_releasedEvent;
+};
+
 class Joystick {
 public:
   Joystick(uint8_t xPin,uint8_t yPin,uint8_t switchPin):_x(xPin),_y(yPin),_sw(switchPin){}
