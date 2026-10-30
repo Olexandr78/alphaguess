@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <math.h>
 #include <DHT.h>
 namespace SUI {
 class DHTSensor {
