@@ -44,3 +44,16 @@ Optional wrappers support DHT11/DHT22, DS18B20 and BMP280 using their establishe
 - Use level shifting for 3.3V-only inputs when connected to 5V boards.
 - Do not power motors, servos or SIM800L from GPIO pins.
 - Relays may switch hazardous mains voltage. Use enclosed, correctly rated equipment and qualified help.
+
+
+## ESP32 board notes
+The built-in GPIO, I2C, SPI, serial, sensor and controller helpers use the Arduino API and are intended to work on ESP32 boards supported by Arduino-ESP32. The Servo adapter automatically includes ESP32Servo on ESP32 and the standard Servo library on other architectures.
+
+- The CI build target is the generic ESP32 Dev Module (esp32:esp32:esp32); other ESP32 variants may use different board definitions and pin mappings.
+- ESP32 GPIO is 3.3V-only and is not 5V tolerant. Do not connect 5V logic outputs directly to ESP32 pins.
+- Avoid input-only pins for outputs; check your exact board's pinout, strapping pins and flash/PSRAM-reserved pins.
+- ESP32 ADC pins and usable ADC channels vary by chip/board. A0 aliases are not universal; use the pin names/numbers printed for your board.
+- The ESP32 Arduino core provides PWM through its Arduino-compatible APIs, but resolution/channel behavior differs from classic AVR boards.
+- The OV7670 adapter is not claimed to support ESP32: its upstream Arduino_OV767X implementation targets selected Arduino boards. Use a camera-specific ESP32 driver/board for ESP32 camera hardware.
+- The DFPlayer example in this repository uses AVR SoftwareSerial; on ESP32, connect DFPlayer to a hardware UART (HardwareSerial) instead.
+- CI verifies compilation only, not electrical behavior or attached hardware.
