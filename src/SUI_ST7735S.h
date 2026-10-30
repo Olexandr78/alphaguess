@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <math.h>
 
 // Native SPI driver for ST7735S panels. No Adafruit dependency.
 namespace SUI {
@@ -11,13 +12,15 @@ public:
   explicit ST7735S(uint8_t cs, uint8_t dc, uint8_t rst,
                    SPIClass &spi = SPI)
       : _cs(cs), _dc(dc), _rst(rst), _spi(spi),
-        _width(128), _height(160), _rotation(0),
+        _width(128), _height(160), _nativeWidth(128), _nativeHeight(160), _rotation(0),
         _cursorX(0), _cursorY(0), _textColor(0xFFFF),
         _textBg(0x0000), _textSize(1), _wrap(true),
         _xStart(0), _yStart(0) {}
 
   void begin(uint16_t width = 128, uint16_t height = 160,
              uint8_t rotation = 0) {
+    _nativeWidth = width;
+    _nativeHeight = height;
     _width = width;
     _height = height;
     _rotation = rotation & 3;
@@ -82,10 +85,10 @@ public:
     _rotation = rotation & 3;
     uint8_t madctl = 0xC8;
     switch (_rotation) {
-      case 0: madctl = 0xC8; _width = 128; _height = 160; break;
-      case 1: madctl = 0xA8; _width = 160; _height = 128; break;
-      case 2: madctl = 0x08; _width = 128; _height = 160; break;
-      default: madctl = 0x68; _width = 160; _height = 128; break;
+      case 0: madctl = 0xC8; _width = _nativeWidth; _height = _nativeHeight; break;
+      case 1: madctl = 0xA8; _width = _nativeHeight; _height = _nativeWidth; break;
+      case 2: madctl = 0x08; _width = _nativeWidth; _height = _nativeHeight; break;
+      default: madctl = 0x68; _width = _nativeHeight; _height = _nativeWidth; break;
     }
     const uint8_t value[] = {madctl};
     commandData(0x36, value, 1);
@@ -99,6 +102,7 @@ public:
     if (x < 0 || y < 0 || x >= (int16_t)_width || y >= (int16_t)_height) return;
     setAddrWindow(x, y, x, y);
     writeColor(color);
+    finishPixels();
   }
 
   void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
@@ -111,6 +115,7 @@ public:
     setAddrWindow(x, y, x + w - 1, y + h - 1);
     uint32_t count = (uint32_t)w * h;
     while (count--) writeColor(color);
+    finishPixels();
   }
 
   void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
@@ -151,6 +156,7 @@ public:
   }
 
   void fillCircle(int16_t x0, int16_t y0, int16_t radius, uint16_t color) {
+    if (radius < 0) return;
     for (int16_t y = -radius; y <= radius; ++y) {
       int16_t span = (int16_t)sqrt((double)radius * radius - (double)y * y);
       drawLine(x0 - span, y0 + y, x0 + span, y0 + y, color);
@@ -191,6 +197,7 @@ private:
   uint8_t _cs, _dc, _rst;
   SPIClass &_spi;
   uint16_t _width, _height;
+  uint16_t _nativeWidth, _nativeHeight;
   uint8_t _rotation;
   int16_t _cursorX, _cursorY;
   uint16_t _textColor, _textBg;
@@ -254,7 +261,7 @@ private:
                 uint16_t background, uint8_t size) {
     const uint8_t *glyph = glyphFor(c);
     for (uint8_t col = 0; col < 5; ++col) {
-      uint8_t bits = glyph[col];
+      uint8_t bits = pgm_read_byte(&glyph[col]);
       for (uint8_t row = 0; row < 7; ++row) {
         uint16_t pixelColor = (bits & (1 << row)) ? color : background;
         if (size == 1) drawPixel(x + col, y + row, pixelColor);
