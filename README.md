@@ -74,7 +74,7 @@ Example:
 #include <SashaUniversalIO.h>
 ```
 
-The main header stays buildable without optional third-party libraries when their switches are not defined. For TFTs, include the controller driver and pass its display object to `SUI::AdafruitTFT<Display>`.
+The main header stays buildable without optional third-party libraries when their switches are not defined. On ESP32, install ESP32Servo for SUI_ENABLE_SERVO; on classic AVR boards, install the standard Servo library. For TFTs, include the controller driver and pass its display object to `SUI::AdafruitTFT<Display>`.
 
 ## OV7670 notes
 
@@ -96,7 +96,7 @@ The camera adapter wraps the upstream Arduino_OV767X driver. The upstream librar
 
 ## Build and test status
 
-A GitHub Actions workflow compiles the Uno examples and the OV7670 example for Nano 33 BLE. These automated builds are not physical hardware tests. No claim is made that every module revision or every Arduino-compatible chip is supported; report tested board/module combinations to expand the compatibility matrix.
+A GitHub Actions workflow compiles the Uno examples, an ESP32 Dev Module-compatible example set, and the OV7670 example for Nano 33 BLE. The Servo adapter selects ESP32Servo automatically on ESP32. These automated builds are not physical hardware tests. No claim is made that every module revision or every Arduino-compatible chip is supported; report tested board/module combinations to expand the compatibility matrix.
 
 ## License
 
