@@ -1,98 +1,98 @@
 # SashaUniversalIO
 
-**One Arduino library and one main include for common displays, sensors, motors, communication modules and I/O hardware.**
+**An expandable Arduino hardware toolkit with one main include for built-in drivers and optional switches for third-party adapters.**
 
-> The repository is still named `alphaguess`; the connected GitHub integration cannot rename repositories. The existing AlphaGuess release and APK are untouched.
+The repository is still named `alphaguess`; the AlphaGuess APK and release are preserved. The library source is under `src/`.
 
-## Quick start
+## One include for the built-in drivers
 
 ```cpp
 #include <SashaUniversalIO.h>
 
+SUI::Joystick joystick(A0, A1, 2);       // HW-504
+SUI::RotaryEncoder encoder(3, 4, 5);    // HW-040
 SUI::Relay relay(7, SUI::ActiveLevel::LOW);
-SUI::Joystick stick(A0, A1, 2);
-SUI::RotaryEncoder encoder(3, 4, 5);
-SUI::ActiveBeeper beeper(6);
-
-void setup() {
-  relay.begin();
-  stick.begin();
-  encoder.begin();
-  beeper.begin();
-}
-
-void loop() {
-  encoder.update();
-  if (stick.pressed()) relay.toggle();
-  if (encoder.position() > 10) beeper.on();
-  else beeper.off();
-}
+SUI::Stepper4Wire stepper(8, 9, 10, 11);
+SUI::TM1637Display display(12, 13);
 ```
 
-## Modules in the main header
+The main header includes core I/O, common modules, display controllers and the I2C character LCD helper.
 
-| Device / module | API | Notes |
+## Built-in drivers
+
+| Family / module | Class | Capabilities |
 |---|---|---|
-| Relay modules | `SUI::Relay` | Active HIGH/LOW; relay contacts and load wiring are external |
-| Buttons | `SUI::Button` | Pull-up or plain input |
-| Passive buzzer | `SUI::Buzzer` / `SUI::PassiveBeeper` | Uses `tone()` |
-| Active beeper | `SUI::ActiveBeeper` | Digital on/off |
-| HC-SR04 | `SUI::HCSR04` | Ultrasonic distance |
-| HW-504 / KY-023 joystick | `SUI::Joystick` | X, Y analog values and SW button |
-| HW-040 / KY-040 encoder | `SUI::RotaryEncoder` | CLK, DT, optional SW; call `update()` often |
-| 4-wire stepper | `SUI::Stepper4Wire` | Basic blocking sequence for ULN2003/L298N-style inputs; not a precision motion controller |
-| Single 7-segment digit | `SUI::SevenSegment` | Common-anode or common-cathode; segment resistors required |
-| DIP switch bank | `SUI::DipSwitch` | Up to 8 switches, INPUT_PULLUP |
-| Analog microphone | `SUI::AnalogMicrophone` | For amplified AO microphone boards |
-| Digital sound detector | `SUI::SoundDetector` | LM393-style DO output |
-| HC-05 / HC-06 | `SUI::BluetoothUART` | Wraps a `Stream`; use HardwareSerial or SoftwareSerial |
-| HW-748 / SIM800L | `SUI::SIM800L` | Basic AT-command UART helper only; not a full GSM API |
+| Relay | `Relay` | Active HIGH/LOW, on/off/toggle |
+| Buttons | `Button` | Pull-up or plain digital input |
+| Passive / active beepers | `Buzzer`, `ActiveBeeper` | Tone playback or digital on/off |
+| Ultrasonic | `HCSR04` | HC-SR04 distance in cm |
+| HW-504 / KY-023 | `Joystick` | X/Y analog axes and push button |
+| HW-040 / KY-040 | `RotaryEncoder` | Quadrature CLK/DT and optional SW |
+| 4-wire stepper | `Stepper4Wire` | Basic 8-phase sequence for driver inputs |
+| STEP/DIR stepper | `StepDirStepper` | A4988/DRV8825/TMC STEP/DIR interface |
+| Single 7-segment | `SevenSegment` | Common-anode/cathode direct GPIO |
+| TM1637 | `TM1637Display` | 4-digit display, brightness and number |
+| MAX7219/MAX7221 | `MAX7219Display` | 8-digit/LED segment controller, raw segments and digits |
+| 74HC595 | `ShiftRegister595` | 8 latched digital outputs |
+| DIP switch | `DipSwitch` | Up to 8 pull-up inputs |
+| Analog mic / sound module | `AnalogMicrophone`, `SoundDetector` | Amplified analog AO / comparator digital DO |
+| HC-05 / HC-06 | `BluetoothUART` | Generic UART `Stream` wrapper |
+| HW-748 / SIM800L | `SIM800L` | AT-command UART transport, not a full GSM stack |
+| HD44780 I2C LCD | `I2CLCD` | Common PCF8574 backpack mapping |
 
-## Optional adapters
+## Optional adapters (same library package)
 
-These adapters use third-party Arduino libraries and are kept in separate headers so the main include still compiles when those libraries are not installed.
+Enable an adapter before the main include. Install its dependency through Arduino Library Manager first.
 
-| Device | Header | Dependency |
+| Define | Adapter | Dependency |
 |---|---|---|
-| HD44780 1602/2004 I2C LCD | `SUI_I2CLCD.h` | Wire (included with Arduino); common PCF8574 backpack mapping |
-| TFT (ST7735/ST7789/ILI9341 and compatible) | `SUI_AdafruitTFT.h` | Adafruit_GFX plus the controller driver |
-| Servo | `SUI_Servo.h` | Arduino Servo |
-| SD / microSD | `SUI_SD.h` | Arduino SD |
-| DFPlayer Mini | `SUI_DFPlayer.h` | DFRobotDFPlayerMini |
+| `SUI_ENABLE_SERVO` | `ServoMotor` | Arduino Servo |
+| `SUI_ENABLE_TFT` | `AdafruitTFT` | Adafruit_GFX + matching controller driver |
+| `SUI_ENABLE_SD` | `SDCard` | Arduino SD |
+| `SUI_ENABLE_DFPLAYER` | `DFPlayer` | DFRobotDFPlayerMini |
+| `SUI_ENABLE_OV7670` | `OV7670Camera` | Arduino_OV767X |
 
 Example:
+
 ```cpp
+#define SUI_ENABLE_DFPLAYER
+#define SUI_ENABLE_SD
 #include <SashaUniversalIO.h>
-#include <SUI_Servo.h>
-#include <SUI_SD.h>
-#include <SUI_DFPlayer.h>
 ```
 
-## Displays
+For TFTs, include the controller's own header and pass its display object to `SUI::AdafruitTFT<Display>`.
 
-- Character LCD: common HD44780 with PCF8574 I2C backpack.
-- TFT: thin adapter for Adafruit_GFX-compatible controller libraries. Install the correct controller library separately.
-- Seven-segment: direct GPIO single digit in the main header. TM1637/MAX7219 and multi-digit multiplexed modules require their own controller adapter.
-- OLED is a separate display family, not a TFT.
+## OV7670 support and limitations
 
-## Cameras and hardware-specific modules
+The OV7670 adapter wraps the official Arduino_OV767X driver rather than pretending that camera capture is identical on every MCU. The upstream driver supports OV7670/OV7675 on selected boards; its documented example uses Nano 33 BLE, QVGA/RGB565 and a large frame buffer. This is not suitable for an Uno/Nano AVR with its small SRAM. See the [upstream driver](https://github.com/arduino-libraries/Arduino_OV767X) and [capture example](https://github.com/arduino-libraries/Arduino_OV767X/blob/master/examples/CameraCaptureRawBytes/CameraCaptureRawBytes.ino).
 
-OV7670 is **not yet implemented**. It needs SCCB register configuration, a pixel clock and fast capture; classic AVR boards often lack RAM/bandwidth. Support must be developed and tested per MCU/capture hardware.
+## Hardware and electrical notes
 
-## Electrical safety and compatibility
+- HW-504 uses two analog potentiometer outputs plus a push switch. HW-040 is a quadrature encoder.
+- 4-wire stepper motors must connect through a suitable driver (e.g. ULN2003). STEP/DIR motors need a driver such as A4988/DRV8825; configure its current limit and pulse timing.
+- Seven-segment direct GPIO needs one current-limiting resistor per segment. TM1637/MAX7219 modules have their own controller chips.
+- A bare electret capsule requires bias and a preamplifier. `AnalogMicrophone` expects an amplified AO signal.
+- HC-05/HC-06 and SIM800L logic levels vary by breakout; use level shifting when required. HW-748 is sold as a SIM800L breakout/kit. SIM800L needs a stable supply for current bursts; never power it from a GPIO/3.3V pin.
+- SD cards and many TFT modules use 3.3V logic; check the board's level shifting.
+- Servos, motors, SIM800L and relays need appropriate power circuitry. Relays may switch lethal mains voltage: use enclosed, rated equipment and qualified supervision.
+- Module labels and clones vary. Check the actual PCB pinout before wiring.
 
-- Check the exact module revision and pinout. Board names are often reused by different vendors.
-- HC-05/HC-06 and SIM800L UART logic levels differ by breakout revision. Do not assume RX pins are 5 V tolerant; use level shifting where needed.
-- SIM800L needs a stable supply capable of high current bursts; do not power it from an Arduino 3.3 V pin.
-- Microphone capsules need bias and amplification. The analog class expects an already amplified AO output; it does not connect a bare electret capsule directly.
-- Stepper motors and servos need suitable motor supplies and drivers; never power them from GPIO.
-- SD cards use 3.3 V logic; use a level-shifted module with 5 V Arduino boards.
-- TFT modules may also be 3.3 V only.
-- Relays may switch hazardous mains voltage. Use enclosed, properly rated hardware and qualified help; never touch exposed mains wiring.
+## Examples
 
-## Current limitations
+- `BasicModules`
+- `I2C_LCD`
+- `ServoMotor`
+- `TFT_AdafruitGFX`
+- `Joystick_Encoder`
+- `SD_Card`
+- `Stepper_SevenSegment_Audio`
+- `DisplayControllers`
+- `OV7670_Capture`
+- `DFPlayer_Mini`
 
-This is a growing library, not a magical driver for every chip ever made. Some device families need their own controller libraries or board-specific implementations. Hardware compilation and physical tests are still required; no universal hardware test has been claimed.
+## Build status
+
+The library now contains implementations for the modules listed above, but it has not been physically tested against every board or module revision. The OV767X upstream library itself is board-specific. This project does not claim compatibility with every Arduino chip, display controller or sensor on the market. Report tested board + module combinations to grow the compatibility matrix.
 
 ## License
 
