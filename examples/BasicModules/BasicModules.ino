@@ -1,6 +1,6 @@
 #include <SashaUniversalIO.h>
 
-SUI::Relay relay(7, SUI::ActiveLevel::LOW); // Many relay boards are active LOW
+SUI::Relay relay(7, SUI::ActiveLevel::LOW_LEVEL); // Many relay boards are active LOW
 SUI::Button button(2);                      // Button between pin 2 and GND
 SUI::Buzzer buzzer(8);
 SUI::HCSR04 sonar(10, 11);
