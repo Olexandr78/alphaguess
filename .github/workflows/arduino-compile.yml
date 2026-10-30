@@ -19,6 +19,11 @@ jobs:
           arduino-cli lib install "Adafruit GFX Library"
           arduino-cli lib install "Adafruit ST7735 and ST7789 Library"
           arduino-cli lib install "DFRobotDFPlayerMini"
+          arduino-cli lib install "Adafruit SSD1306"
+          arduino-cli lib install "DHT sensor library"
+          arduino-cli lib install "OneWire"
+          arduino-cli lib install "DallasTemperature"
+          arduino-cli lib install "Adafruit BMP280 Library"
       - name: Compile Uno examples
         shell: bash
         run: |
