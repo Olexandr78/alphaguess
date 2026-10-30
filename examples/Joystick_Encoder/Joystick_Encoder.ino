@@ -4,7 +4,7 @@
 SUI::Joystick joystick(A0, A1, 2);
 // HW-040: CLK=D3, DT=D4, SW=D5
 SUI::RotaryEncoder encoder(3, 4, 5);
-SUI::Relay relay(7, SUI::ActiveLevel::LOW);
+SUI::Relay relay(7, SUI::ActiveLevel::LOW_LEVEL);
 
 void setup() {
   Serial.begin(9600);
