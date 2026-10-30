@@ -37,3 +37,16 @@ jobs:
             echo "Compiling $sketch"
             arduino-cli compile --fqbn arduino:avr:uno --library "$GITHUB_WORKSPACE" "examples/$sketch"
           done
+
+  camera-example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Install Nano 33 BLE core and OV767X library
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:mbed_nano
+          arduino-cli lib install Arduino_OV767X
+      - name: Compile OV7670 example
+        run: arduino-cli compile --fqbn arduino:mbed_nano:nano33ble --library "$GITHUB_WORKSPACE" examples/OV7670_Capture
