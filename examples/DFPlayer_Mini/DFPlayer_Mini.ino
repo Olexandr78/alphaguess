@@ -1,1 +1,19 @@
-#define SUI_ENABLE_DFPLAYER\n#include <SashaUniversalIO.h>\n#include <SoftwareSerial.h>\n\nSoftwareSerial mp3Serial(10, 11); // Arduino RX, TX; cross-connect to DFPlayer TX, RX\nSUI::DFPlayer player;\n\nvoid setup() {\n  Serial.begin(9600);\n  mp3Serial.begin(9600);\n  if (!player.begin(mp3Serial)) { Serial.println("DFPlayer not found"); while (true) {} }\n  player.volume(18);\n  player.play(1);\n}\nvoid loop() {}\n
+#define SUI_ENABLE_DFPLAYER
+#include <SashaUniversalIO.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial mp3Serial(10, 11); // Arduino RX, TX; cross-connect to DFPlayer TX, RX
+SUI::DFPlayer player;
+
+void setup() {
+  Serial.begin(9600);
+  mp3Serial.begin(9600);
+  if (!player.begin(mp3Serial)) {
+    Serial.println("DFPlayer not found");
+    while (true) {}
+  }
+  player.volume(18);
+  player.play(1);
+}
+
+void loop() {}
