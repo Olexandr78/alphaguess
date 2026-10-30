@@ -1,1 +1,23 @@
-#include <SashaUniversalIO.h>\n\nSUI::TM1637Display tm(2, 3);\nSUI::MAX7219Display matrix(4, 5, 6);\nSUI::StepDirStepper motor(7, 8, 9); // STEP, DIR, ENABLE\nSUI::ShiftRegister595 outputs(11, 12, 13); // DATA, CLOCK, LATCH\n\nvoid setup() {\n  tm.begin(); tm.setBrightness(5);\n  matrix.begin(4);\n  motor.begin(); motor.enable();\n  outputs.begin();\n}\n\nvoid loop() {\n  static int value = 0;\n  tm.showNumber(value);\n  matrix.setDigit(0, (uint8_t)(value % 10));\n  outputs.write((uint8_t)value);\n  motor.move(200);\n  value = (value + 1) % 10000;\n  delay(250);\n}\n
+#include <SashaUniversalIO.h>
+
+SUI::TM1637Display tm(2, 3);
+SUI::MAX7219Display matrix(4, 5, 6);
+SUI::StepDirStepper motor(7, 8, 9); // STEP, DIR, ENABLE
+SUI::ShiftRegister595 outputs(11, 12, 13); // DATA, CLOCK, LATCH
+
+void setup() {
+  tm.begin(); tm.setBrightness(5);
+  matrix.begin(4);
+  motor.begin(); motor.enable();
+  outputs.begin();
+}
+
+void loop() {
+  static int value = 0;
+  tm.showNumber(value);
+  matrix.setDigit(0, (uint8_t)(value % 10));
+  outputs.write((uint8_t)value);
+  motor.move(200);
+  value = (value + 1) % 10000;
+  delay(250);
+}
