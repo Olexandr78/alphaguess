@@ -4,7 +4,7 @@
 #include <Wire.h>
 
 namespace SUI {
-enum class ActiveLevel : uint8_t { HIGH_LEVEL = HIGH, LOW = LOW };
+enum class ActiveLevel : uint8_t { HIGH_LEVEL = HIGH, LOW_LEVEL = 0 };
 class Relay {
 public:
   explicit Relay(uint8_t pin,ActiveLevel active=ActiveLevel::HIGH_LEVEL):_pin(pin),_active(active),_on(false){}
@@ -15,8 +15,8 @@ public:
   bool isOn()const{return _on;}
 private:
   uint8_t _pin;ActiveLevel _active;bool _on;
-  uint8_t activeValue()const{return _active==ActiveLevel::LOW?LOW:HIGH;}
-  uint8_t inactiveValue()const{return _active==ActiveLevel::LOW?HIGH:LOW;}
+  uint8_t activeValue()const{return _active==ActiveLevel::LOW_LEVEL?LOW:HIGH;}
+  uint8_t inactiveValue()const{return _active==ActiveLevel::LOW_LEVEL?HIGH:LOW;}
 };
 class Button {
 public:
