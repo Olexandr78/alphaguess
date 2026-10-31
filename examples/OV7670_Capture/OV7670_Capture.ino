@@ -1,20 +1,50 @@
 #define SUI_ENABLE_OV7670
 #include <SashaUniversalIO.h>
 
-// This example needs a board supported by Arduino_OV767X (for example Nano 33 BLE).
-// QCIF RGB565 = 176 * 144 * 2 bytes; this buffer is too large for an Uno/Nano AVR.
-SUI::OV7670Camera camera;
-uint8_t frame[176UL * 144UL * 2UL];
+// Example ESP32 GPIO assignment only. Change to match your wiring.
+// 3.3V and DGND are power connections, not GPIOs.
+SUI::OV7670Pins cameraPins = {
+  -1, // 3.3V
+  -1, // DGND
+  21, // SCL
+  22, // SDA
+  25, // VS
+  23, // HS
+  19, // PLK / PCLK
+  18, // XLK / XCLK (clock output backend not implemented here)
+  32, // D7
+  33, // D6
+  34, // D5
+  35, // D4
+  36, // D3
+  39, // D2
+   -1, // D1
+  -1, // D0
+  -1, // RET: intentionally not driven until its function is confirmed
+  26  // PWDN
+};
+
+SUI::OV7670Camera camera(cameraPins);
 
 void setup() {
   Serial.begin(115200);
-  if (!camera.begin(QCIF, RGB565, 1)) {
-    Serial.println("OV7670 init failed or board unsupported");
-    while (true) {}
+  delay(500);
+
+  if (!camera.begin()) {
+    Serial.println("OV7670 not detected over SCCB; check power, SCL and SDA.");
+    while (true) delay(100);
   }
-  Serial.print("Frame bytes: "); Serial.println(camera.frameSize());
+
+  Serial.print("OV7670 detected, PID=0x");
+  Serial.println(camera.productId(), HEX);
+
+  if (!camera.resetSensor()) {
+    Serial.println("Sensor reset command failed.");
+    while (true) delay(100);
+  }
+
+  Serial.println("Native SCCB register control is ready.");
+  Serial.println("Frame capture still needs an MCU-specific DMA backend.");
 }
 
-void loop() {
-  if (camera.capture(frame)) Serial.write(frame, camera.frameSize());
-}
+void loop() {}
