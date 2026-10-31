@@ -53,6 +53,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: arduino/setup-arduino-cli@v2
+      - name: Install ESP32 core
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
       - name: Compile native OV7670 SCCB example on ESP32
         run: arduino-cli compile --fqbn esp32:esp32:esp32 --library "$GITHUB_WORKSPACE" examples/OV7670_Capture
 
