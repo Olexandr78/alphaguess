@@ -61,7 +61,7 @@ Define the switch before `#include <SashaUniversalIO.h>`. Install the dependency
 | `SUI_ENABLE_OLED` | `AdafruitOLED` | Adafruit_GFX + Adafruit SSD1306 |
 | `SUI_ENABLE_SD` | `SDCard` | Arduino SD |
 | `SUI_ENABLE_DFPLAYER` | `DFPlayer` | DFRobotDFPlayerMini |
-| `SUI_ENABLE_OV7670` | `OV7670Camera` | Arduino_OV767X |
+| `SUI_ENABLE_OV7670` | `OV7670Camera`, `OV7670Pins` | Native SCCB register control via Arduino Wire; no camera library dependency |
 | `SUI_ENABLE_DHT` | `DHTSensor` | DHT sensor library |
 | `SUI_ENABLE_DS18B20` | `DS18B20` | OneWire + DallasTemperature |
 | `SUI_ENABLE_BMP280` | `BMP280Sensor` | Adafruit BMP280 Library |
@@ -79,7 +79,7 @@ The main header stays buildable without optional third-party libraries when thei
 
 ## OV7670 notes
 
-The camera adapter wraps the upstream Arduino_OV767X driver. The upstream library supports OV7670/OV7675 on selected boards; its example uses Nano 33 BLE and a large RGB565 frame buffer. It is not suitable for an Uno/Nano AVR with small SRAM. Check the [upstream driver](https://github.com/arduino-libraries/Arduino_OV767X) and [capture example](https://github.com/arduino-libraries/Arduino_OV767X/blob/master/examples/CameraCaptureRawBytes/CameraCaptureRawBytes.ino).
+The native `OV7670Camera` driver configures SCCB through Arduino `Wire`, reads the sensor product ID, and exposes register read/write plus software reset. `OV7670Pins` records the module pinout: 3.3V, DGND, SCL, SDA, VS, HS, PLK/PCLK, XLK/XCLK, D7-D0, RET and PWDN. Power and ground are documentation-only fields. `RET` is preserved as labelled and is not toggled automatically because its function depends on the module revision. On ESP32, custom SCL/SDA pins are passed to `Wire.begin`; on other cores, `Wire.begin()` uses the board's hardware-I2C pins. **Pixel capture is not implemented by this SCCB layer yet**: it needs a board-specific clock and parallel/DMA backend. Do not interpret successful sensor detection as proof that frame capture works. The Uno/Nano AVR is not a practical full-frame capture target due to its limited SRAM and throughput.
 
 ## Electrical notes
 
