@@ -31,6 +31,35 @@ struct OV7670Pins {
 
 class OV7670Camera {
 public:
+  // Direct pin constructor: pass the module wiring at the call site.
+  // Order: SCL, SDA, VS, HS, PCLK (module label PLK), XCLK (XLK),
+  // D7..D0, RET, PWDN. RET and PWDN are optional.
+  OV7670Camera(int8_t scl, int8_t sda, int8_t vs, int8_t hs,
+               int8_t pclk, int8_t xclk,
+               int8_t d7, int8_t d6, int8_t d5, int8_t d4,
+               int8_t d3, int8_t d2, int8_t d1, int8_t d0,
+               int8_t ret = -1, int8_t pwdn = -1,
+               TwoWire &wire = Wire, uint8_t address = 0x21)
+      : _pins(), _wire(wire), _address(address) {
+    _pins.scl = scl;
+    _pins.sda = sda;
+    _pins.vs = vs;
+    _pins.hs = hs;
+    _pins.pclk = pclk;
+    _pins.xclk = xclk;
+    _pins.d7 = d7;
+    _pins.d6 = d6;
+    _pins.d5 = d5;
+    _pins.d4 = d4;
+    _pins.d3 = d3;
+    _pins.d2 = d2;
+    _pins.d1 = d1;
+    _pins.d0 = d0;
+    _pins.ret = ret;
+    _pins.pwdn = pwdn;
+  }
+
+  // Advanced overload for applications that already build an OV7670Pins map.
   explicit OV7670Camera(const OV7670Pins &pins, TwoWire &wire = Wire,
                         uint8_t address = 0x21)
       : _pins(pins), _wire(wire), _address(address) {}
