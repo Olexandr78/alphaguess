@@ -1,7 +1,8 @@
 #define SUI_ENABLE_OV7670
 #include <SashaUniversalIO.h>
 
-// Example ESP32 GPIO assignment only. Change to match your wiring.
+// ESP32-WROOM-32 wiring. Connect every camera signal to the GPIO listed here.
+// D1 and D0 are assigned to GPIO14 and GPIO27 (they were previously unassigned).
 // 3.3V and DGND are power connections, not GPIOs.
 SUI::OV7670Pins cameraPins = {
   -1, // 3.3V
@@ -18,8 +19,8 @@ SUI::OV7670Pins cameraPins = {
   35, // D4
   36, // D3
   39, // D2
-   -1, // D1
-  -1, // D0
+  14, // D1
+  27, // D0
   -1, // RET: intentionally not driven until its function is confirmed
   26  // PWDN
 };
