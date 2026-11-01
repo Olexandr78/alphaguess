@@ -1,56 +1,30 @@
 #define SUI_ENABLE_OV7670
 #include <SashaUniversalIO.h>
 
-// Set these GPIO numbers to match YOUR wiring.
-// ESP32-WROOM-32 GPIO matrix allows the camera input signals to use
-// different suitable GPIOs; this is only an example mapping.
+// ESP32-WROOM-32 example only. Change the GPIO numbers below to match
+// YOUR wiring. Constructor order:
+// SCL, SDA, VS, HS, PLK(PCLK), XLK(XCLK), D7..D0, RET, PWDN.
 //
-// Important ESP32-WROOM-32 restrictions:
-// - GPIO 34..39 are input-only (fine for D0..D7, VS, HS and PCLK).
-// - XCLK must use an output-capable GPIO.
-// - Avoid GPIO 6..11 (connected to flash).
-// - GPIO 0, 2, 5, 12 and 15 are strapping pins; use carefully.
-// - 3.3V and DGND are power connections, not GPIOs.
-// - RET is left unassigned because its function depends on the module.
+// GPIO 34..39 are input-only and are suitable for camera input signals.
+// XCLK needs an output-capable GPIO. Avoid GPIO 6..11 (flash).
+// GPIO 0, 2, 5, 12 and 15 are strapping pins: use with care.
+// Connect 3.3V to 3.3V and DGND to GND, never to GPIO.
+// RET is left at -1 until its function on this module is confirmed.
 
-SUI::OV7670Pins cameraPins;
-
-void configureCameraPins() {
-  cameraPins.scl  = 21; // SCL
-  cameraPins.sda  = 22; // SDA
-
-  cameraPins.vs   = 25; // VS
-  cameraPins.hs   = 23; // HS
-  cameraPins.pclk = 19; // PLK (PCLK)
-  cameraPins.xclk = 18; // XLK (XCLK)
-
-  cameraPins.d7 = 32; // D7
-  cameraPins.d6 = 33; // D6
-  cameraPins.d5 = 34; // D5
-  cameraPins.d4 = 35; // D4
-  cameraPins.d3 = 36; // D3
-  cameraPins.d2 = 39; // D2
-  cameraPins.d1 = 14; // D1
-  cameraPins.d0 = 27; // D0
-
-  cameraPins.pwdn = 26; // PWDN; set -1 if not connected
-  cameraPins.ret  = -1; // RET; do not drive until its function is confirmed
-
-  // Power pins are documentation-only. Never connect them to GPIO:
-  cameraPins.vcc = -1;  // 3.3V
-  cameraPins.dgnd = -1; // DGND / GND
-}
-
-SUI::OV7670Camera camera(cameraPins);
+SUI::OV7670Camera camera(
+  21, 22,             // SCL, SDA
+  25, 23, 19, 18,      // VS, HS, PLK/PCLK, XLK/XCLK
+  32, 33, 34, 35,      // D7, D6, D5, D4
+  36, 39, 14, 27,      // D3, D2, D1, D0
+  -1, 26               // RET (unused), PWDN
+);
 
 void setup() {
   Serial.begin(115200);
   delay(500);
 
-  configureCameraPins();
-
   if (!camera.begin()) {
-    Serial.println("OV7670 not detected over SCCB; check power, SCL and SDA.");
+    Serial.println("OV7670 not detected over SCCB; check power, XCLK, SCL and SDA.");
     while (true) delay(100);
   }
 
@@ -62,8 +36,8 @@ void setup() {
     while (true) delay(100);
   }
 
-  Serial.println("Native SCCB register control is ready.");
-  Serial.println("Frame capture still needs an MCU-specific DMA backend.");
+  Serial.println("OV7670 SCCB control is ready.");
+  Serial.println("This example does not yet capture image frames.");
 }
 
 void loop() {}
