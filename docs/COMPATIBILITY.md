@@ -35,16 +35,17 @@ Optional wrappers support DHT11/DHT22, DS18B20 and BMP280 using their establishe
 `SDCard` wraps Arduino SD and uses board SPI pins plus chip select. `DFPlayer` wraps DFRobotDFPlayerMini.
 
 ## OV7670 (ESP32-WROOM-32)
-Define `SUI_ENABLE_OV7670` before including `SashaUniversalIO.h`. The native driver:
-- Generates XCLK on the user-selected GPIO using the ESP32 LEDC peripheral (default 10 MHz; configurable from 1 to 24 MHz).
-- Starts XCLK before opening SCCB and checking PID 0x76.
-- Uses custom SCL/SDA pins on ESP32.
-- Preserves the module label `RET` and does not drive it because its function on the user's module revision is unconfirmed.
+
+Define `SUI_ENABLE_OV7670` before including `SashaUniversalIO.h`. The native implementation:
+- Generates XCLK on the selected GPIO using ESP32 LEDC (default 10 MHz; configurable from 1 to 24 MHz).
+- Starts XCLK before SCCB access and checks sensor PID 0x76.
+- Configures QQVGA RGB565 (160x120) and receives pixel data through the original ESP32 I2S0 camera-slave mode with linked DMA descriptors.
+- Exposes `captureFrame(dst, dstSize, timeoutMs)`; success returns 38,400 bytes. The example prints a checksum and initial bytes.
+- Accepts a custom GPIO map for every signal. Constructor order is SCL, SDA, VS, HS/HREF, PCLK (module PLK), XCLK (module XLK), D7..D0, RET, PWDN.
+- Preserves `RET` as labelled and never drives it because its function on this board revision is unconfirmed.
 - Does not call `Wire.end()` from camera `end()`, because the I2C bus may be shared.
 
-On Arduino-ESP32 3.x it uses `ledcAttach/ledcWrite(pin,...)`; on 2.x it uses `ledcSetup/ledcAttachPin` and reserves legacy LEDC channel 7. Change that channel in the class if your sketch already uses it.
-
-**Pixel capture is not implemented.** The ESP32-WROOM-32 has no dedicated camera DVP controller; a real capture implementation needs a correctly configured I2S parallel-input + DMA backend, buffer ownership and timing validation. SCCB detection and XCLK generation are not proof of image capture. This driver does not pretend otherwise.
+The backend targets the original ESP32 only. It uses low-level ESP32 I2S/GPIO/DMA registers and does not use `esp_camera` or another camera library. Capture timing, signal polarity and RGB565 byte order depend on sensor/module configuration; verify actual image output on the target wiring. A successful compile or SCCB PID read alone does not prove a valid frame. The example is `examples/OV7670_Capture/OV7670_Capture.ino`.
 
 ## Voltage and safety
 - Check each breakout revision and pinout.
