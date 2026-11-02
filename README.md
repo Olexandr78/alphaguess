@@ -79,8 +79,21 @@ The main header stays buildable without optional third-party libraries when thei
 
 ## OV7670 notes
 
-On ESP32-WROOM-32, the native `OV7670Camera` driver generates XCLK with LEDC (default 10 MHz, configurable), starts it before SCCB access, reads PID 0x76, and exposes register read/write plus software reset. `OV7670Pins` records SCL, SDA, VS, HS, PLK/PCLK, XLK/XCLK, D7-D0, RET and PWDN. Power and ground are documentation-only fields. `RET` is preserved as labelled and is never toggled automatically because its function on the module revision is unconfirmed. The driver supports Arduino-ESP32 2.x and 3.x LEDC APIs. **Pixel capture is not implemented**: the ESP32-WROOM-32 needs a separate I2S parallel-input + DMA backend. Successful PID detection is not proof of frame capture.
+On the original ESP32-WROOM-32, the native `OV7670Camera` driver generates XCLK with LEDC (default 10 MHz, configurable), starts it before SCCB access, checks PID 0x76, configures QQVGA RGB565 and receives a frame through the ESP32 I2S0 camera-slave input and DMA. It does not use `esp_camera`, Arduino_OV767X or another camera library.
 
+The default frame is 160x120 RGB565 (38,400 bytes):
+```cpp
+uint8_t frame[SUI::OV7670Camera::FRAME_BYTES];
+size_t received = camera.captureFrame(frame, sizeof(frame), 2000);
+if (received == sizeof(frame)) {
+  // frame contains the captured RGB565 byte stream
+}
+```
+
+`OV7670Pins` allows a custom mapping for SCL, SDA, VS, HS/HREF, PLK/PCLK, XLK/XCLK, D7-D0, RET and PWDN. Power and ground fields are documentation-only. `RET` is preserved as labelled and never toggled because its function on this module revision is unconfirmed. The example `OV7670_Capture` prints a checksum and the first bytes of each frame.
+
+This backend targets the original ESP32 only, not ESP32-S2/S3/C3. DMA timing, signal polarity and RGB565 byte order depend on the actual module and wiring. The source implementation is present, but a successful compile or PID read is not proof that a particular board produces a valid image; verify frame output on the hardware.
+ 
 ## Electrical notes
 
 - Check exact PCB revision and pinout; board labels are not always consistent.
