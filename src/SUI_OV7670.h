@@ -295,7 +295,7 @@ private:
     gpio_matrix_in((uint32_t)_pins.pclk,I2S0I_WS_IN_IDX,false);
     gpio_matrix_in((uint32_t)_pins.vs,I2S0I_V_SYNC_IDX,false);
     gpio_matrix_in((uint32_t)_pins.hs,I2S0I_H_ENABLE_IDX,false);
-    gpio_matrix_in((uint32_t)_pins.hs,I2S0I_H_SYNC_IDX,false);
+    gpio_matrix_in(0x38,I2S0I_H_SYNC_IDX,false);
 
     I2S0.conf.val=0;
     I2S0.conf.rx_slave_mod=1;
@@ -306,7 +306,7 @@ private:
     I2S0.conf2.camera_en=1;
     I2S0.fifo_conf.val=0;
     I2S0.fifo_conf.dscr_en=1;
-    I2S0.fifo_conf.rx_fifo_mod=1;
+    I2S0.fifo_conf.rx_data_num=32;\n    I2S0.fifo_conf.rx_fifo_mod=1;
     I2S0.fifo_conf.rx_fifo_mod_force_en=1;
     I2S0.conf_chan.val=0;
     I2S0.conf_chan.rx_chan_mod=1;
