@@ -7,7 +7,7 @@ VRx and VRy connect to analog inputs; SW is a momentary switch. `SUI::Joystick(x
 CLK, DT and optional SW connect to digital inputs. `SUI::RotaryEncoder(clk,dt,sw)` uses quadrature transition decoding; call `update()` frequently. Mechanical bounce and wiring can still affect readings.
 
 ## Generic inputs and switches
-`AnalogInput` reads analog outputs; `DigitalInput` reads digital outputs with configurable active polarity and pull-up. These generic helpers cover many LDR, IR, Hall, flame, PIR, vibration and line-sensor breakout boards when their outputs are simple analog/digital signals. `DebouncedButton` provides non-blocking debounce events.
+`AnalogInput` reads analog outputs; `DigitalInput` reads digital outputs with configurable active polarity and pull-up. `DebouncedButton` provides non-blocking debounce events.
 
 ## Stepper motors
 - `Stepper4Wire` is a basic blocking 8-phase output sequence for a suitable four-input driver board (e.g. ULN2003).
@@ -17,43 +17,37 @@ Never connect a motor winding directly to MCU pins.
 
 ## Displays
 - `SevenSegment` controls one bare digit directly; order is a,b,c,d,e,f,g,dp. Use one current-limiting resistor per segment.
-- `TM1637Display` handles common 4-digit TM1637 boards.
-- `MAX7219Display` handles MAX7219/MAX7221 serial segment modules; it writes digits/raw segment data, not graphical fonts.
-- `I2CLCD` targets HD44780 LCDs with a common PCF8574 backpack mapping (P0=RS, P1=RW, P2=EN, P3=backlight, P4..P7=D4..D7).
+- `TM1637Display` handles 4-digit TM1637 boards.
+- `MAX7219Display` handles MAX7219/MAX7221 serial segment modules.
+- `I2CLCD` targets HD44780 LCDs with a common PCF8574 backpack mapping.
 - `ParallelLCD` drives HD44780 in 4-bit parallel mode with RW tied to GND.
-- `AdafruitTFT` is a thin helper for Adafruit_GFX-compatible TFT controller libraries.
-- `AdafruitOLED` wraps Adafruit_SSD1306. It requires a call to `flush()` after drawing.
 
 ## Microphones and beepers
-The analog microphone helper reads an already amplified analog output. A bare electret capsule requires bias and a preamplifier. A digital sound module's DO output can be read using `SoundDetector`. Active beepers are digital on/off; passive piezo buzzers use `tone()`.
+The analog microphone helper reads an already amplified analog output. A bare electret capsule requires bias and a preamplifier. Passive piezo buzzers use `tone()`.
 
 ## Common sensors
 Optional wrappers support DHT11/DHT22, DS18B20 and BMP280 using their established third-party libraries. Define the corresponding `SUI_ENABLE_...` macro before including the main header.
 
 ## Bluetooth and GSM
-`BluetoothUART` wraps any Arduino `Stream`; pass HardwareSerial or SoftwareSerial. It does not configure pairing or AT mode. HW-748 is sold as a SIM800L breakout/kit; `SIM800L` only sends raw AT commands and exposes the serial stream. It is not a full SMS/call/network stack. Verify logic levels and supply requirements.
+`BluetoothUART` wraps any Arduino `Stream`; `SIM800L` sends raw AT commands and is not a full SMS/call/network stack. Verify logic levels and supply requirements.
 
 ## SD and DFPlayer
-`SDCard` wraps Arduino SD and uses the board's SPI pins plus chip select. `DFPlayer` wraps DFRobotDFPlayerMini. Insert and prepare a compatible microSD card before playback; track order follows the DFPlayer documentation.
+`SDCard` wraps Arduino SD and uses board SPI pins plus chip select. `DFPlayer` wraps DFRobotDFPlayerMini.
 
-## OV7670
-`SUI_OV7670.h` wraps upstream Arduino_OV767X. Define `SUI_ENABLE_OV7670` before including the umbrella header. The upstream implementation supports selected boards (the official example uses Nano 33 BLE) and requires a large frame buffer. It is not a generic AVR Uno camera driver.
+## OV7670 (ESP32-WROOM-32)
+Define `SUI_ENABLE_OV7670` before including `SashaUniversalIO.h`. The native driver:
+- Generates XCLK on the user-selected GPIO using the ESP32 LEDC peripheral (default 10 MHz; configurable from 1 to 24 MHz).
+- Starts XCLK before opening SCCB and checking PID 0x76.
+- Uses custom SCL/SDA pins on ESP32.
+- Preserves the module label `RET` and does not drive it because its function on the user's module revision is unconfirmed.
+- Does not call `Wire.end()` from camera `end()`, because the I2C bus may be shared.
+
+On Arduino-ESP32 3.x it uses `ledcAttach/ledcWrite(pin,...)`; on 2.x it uses `ledcSetup/ledcAttachPin` and reserves legacy LEDC channel 7. Change that channel in the class if your sketch already uses it.
+
+**Pixel capture is not implemented.** The ESP32-WROOM-32 has no dedicated camera DVP controller; a real capture implementation needs a correctly configured I2S parallel-input + DMA backend, buffer ownership and timing validation. SCCB detection and XCLK generation are not proof of image capture. This driver does not pretend otherwise.
 
 ## Voltage and safety
 - Check each breakout revision and pinout.
-- Use level shifting for 3.3V-only inputs when connected to 5V boards.
-- Do not power motors, servos or SIM800L from GPIO pins.
+- ESP32 GPIO is 3.3V-only and not 5V tolerant.
+- Motors, servos and SIM800L need suitable external supplies/drivers, never GPIO power.
 - Relays may switch hazardous mains voltage. Use enclosed, correctly rated equipment and qualified help.
-
-
-## ESP32 board notes
-The built-in GPIO, I2C, SPI, serial, sensor and controller helpers use the Arduino API and are intended to work on ESP32 boards supported by Arduino-ESP32. The Servo adapter automatically includes ESP32Servo on ESP32 and the standard Servo library on other architectures.
-
-- The CI build target is the generic ESP32 Dev Module (esp32:esp32:esp32); other ESP32 variants may use different board definitions and pin mappings.
-- ESP32 GPIO is 3.3V-only and is not 5V tolerant. Do not connect 5V logic outputs directly to ESP32 pins.
-- Avoid input-only pins for outputs; check your exact board's pinout, strapping pins and flash/PSRAM-reserved pins.
-- ESP32 ADC pins and usable ADC channels vary by chip/board. A0 aliases are not universal; use the pin names/numbers printed for your board.
-- The ESP32 Arduino core provides PWM through its Arduino-compatible APIs, but resolution/channel behavior differs from classic AVR boards.
-- The OV7670 adapter is not claimed to support ESP32: its upstream Arduino_OV767X implementation targets selected Arduino boards. Use a camera-specific ESP32 driver/board for ESP32 camera hardware.
-- The DFPlayer example in this repository uses AVR SoftwareSerial; on ESP32, connect DFPlayer to a hardware UART (HardwareSerial) instead.
-- CI verifies compilation only, not electrical behavior or attached hardware.
