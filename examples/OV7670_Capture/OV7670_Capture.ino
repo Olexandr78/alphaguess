@@ -62,7 +62,7 @@ void loop() {
   for (size_t i = 0; i < 16; ++i) {
     if (frame[i] < 16) Serial.print('0');
     Serial.print(frame[i], HEX);
-    Serial.print(i == 15 ? '\\n' : ' ');
+    Serial.print(i == 15 ? '\n' : ' ');
   }
   delay(500);
 }
