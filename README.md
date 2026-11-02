@@ -61,7 +61,7 @@ Define the switch before `#include <SashaUniversalIO.h>`. Install the dependency
 | `SUI_ENABLE_OLED` | `AdafruitOLED` | Adafruit_GFX + Adafruit SSD1306 |
 | `SUI_ENABLE_SD` | `SDCard` | Arduino SD |
 | `SUI_ENABLE_DFPLAYER` | `DFPlayer` | DFRobotDFPlayerMini |
-| `SUI_ENABLE_OV7670` | `OV7670Camera`, `OV7670Pins` | Native SCCB register control via Arduino Wire; no camera library dependency |
+| `SUI_ENABLE_OV7670` | `OV7670Camera`, `OV7670Pins` | Native SCCB + ESP32 I2S0 camera-mode DMA capture; no camera library dependency |
 | `SUI_ENABLE_DHT` | `DHTSensor` | DHT sensor library |
 | `SUI_ENABLE_DS18B20` | `DS18B20` | OneWire + DallasTemperature |
 | `SUI_ENABLE_BMP280` | `BMP280Sensor` | Adafruit BMP280 Library |
