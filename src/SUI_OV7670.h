@@ -306,7 +306,8 @@ private:
     I2S0.conf2.camera_en=1;
     I2S0.fifo_conf.val=0;
     I2S0.fifo_conf.dscr_en=1;
-    I2S0.fifo_conf.rx_data_num=32;\n    I2S0.fifo_conf.rx_fifo_mod=1;
+    I2S0.fifo_conf.rx_data_num=32;
+    I2S0.fifo_conf.rx_fifo_mod=1;
     I2S0.fifo_conf.rx_fifo_mod_force_en=1;
     I2S0.conf_chan.val=0;
     I2S0.conf_chan.rx_chan_mod=1;
