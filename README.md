@@ -79,7 +79,7 @@ The main header stays buildable without optional third-party libraries when thei
 
 ## OV7670 notes
 
-The native `OV7670Camera` driver configures SCCB through Arduino `Wire`, reads the sensor product ID, and exposes register read/write plus software reset. `OV7670Pins` records the module pinout: 3.3V, DGND, SCL, SDA, VS, HS, PLK/PCLK, XLK/XCLK, D7-D0, RET and PWDN. Power and ground are documentation-only fields. `RET` is preserved as labelled and is not toggled automatically because its function depends on the module revision. On ESP32, custom SCL/SDA pins are passed to `Wire.begin`; on other cores, `Wire.begin()` uses the board's hardware-I2C pins. **Pixel capture is not implemented by this SCCB layer yet**: it needs a board-specific clock and parallel/DMA backend. Do not interpret successful sensor detection as proof that frame capture works. The Uno/Nano AVR is not a practical full-frame capture target due to its limited SRAM and throughput.
+On ESP32-WROOM-32, the native `OV7670Camera` driver generates XCLK with LEDC (default 10 MHz, configurable), starts it before SCCB access, reads PID 0x76, and exposes register read/write plus software reset. `OV7670Pins` records SCL, SDA, VS, HS, PLK/PCLK, XLK/XCLK, D7-D0, RET and PWDN. Power and ground are documentation-only fields. `RET` is preserved as labelled and is never toggled automatically because its function on the module revision is unconfirmed. The driver supports Arduino-ESP32 2.x and 3.x LEDC APIs. **Pixel capture is not implemented**: the ESP32-WROOM-32 needs a separate I2S parallel-input + DMA backend. Successful PID detection is not proof of frame capture.
 
 ## Electrical notes
 
